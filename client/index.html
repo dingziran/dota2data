@@ -1,23 +1,65 @@
 <!doctype html>
-<html lang="en" ng-app>
+<html lang="en" ng-app="dota2data">
   <head>
     <title>Chat Example</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/bootstrap-responsive.min.css">
-    <link rel="stylesheet" href="/css/nv.d3.min.css">
 
   </head>
 <body>
+  <h1>{{"hello" + "world"}}</h1>
   
   
   <script src="/js/jquery.min.js"></script>
   <script src="/js/d3.min.js"></script>
   <script src="/js/bootstrap.min.js"></script>
   <script src="/js/angular.min.js"></script>
+  <script src="/app.js"></script>
   
   <script type="text/javascript">
-    
+  //define data
+  var dataset=[1,2,3,4,5,6,5,4,3,2,1,2,3,4,5,6,7,8,9];
+
+  //define svg
+  var width=500;
+  var height=400;
+  var x=d3.scale.linear()
+          .range([0,width]);
+  var y=d3.scale.linear()
+          .range([height,0]);
+  var svg = d3.select('body').append('svg')
+    .attr('width', width) 
+    .attr('height', height);
+  
+  //
+  function render(data){
+    y.domain([0,100]);
+    d3.select("svg").selectAll("rect")
+      .data(data)
+      .enter()
+      .append('rect');
+
+    d3.select("svg").selectAll("rect")
+      .data(data)
+      .attr({
+        x:function(d,i){return i*(width/data.length)},
+        y:function(d){return y(d)},
+        width:(width/data.length-3),
+        height:function(d){return height-y(d)},
+        fill:function(d){return 'rgb(0,0,'+d*3+')';}
+      });
+    d3.select("svg").selectAll("rect")
+      .data(data)
+      .exit()
+      .remove();
+  }
+  setInterval(function(){
+    dataset.shift();
+    dataset.push(Math.round(Math.random()*100));
+    render(dataset);
+  },1000);
+  render(dataset);
   </script>
   
 </body>
