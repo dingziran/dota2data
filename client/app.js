@@ -1,5 +1,10 @@
-var app=angular.module("dota2data",['ui.router']);
-app.config(function($stateProvider, $urlRouterProvider) {
+var app=angular.module("dota2data",['ui.router','info']);  
+app.config(function($stateProvider,$httpProvider, $urlRouterProvider) {
+      //Enable cross domain calls
+      $httpProvider.defaults.useXDomain = true;
+
+      //Remove the header used to identify ajax call  that would prevent CORS from working
+      delete $httpProvider.defaults.headers.common['X-Requested-With'];
   //
   // For any unmatched url, redirect to /dashboard
   $urlRouterProvider.otherwise("/dashboard");
@@ -9,26 +14,9 @@ app.config(function($stateProvider, $urlRouterProvider) {
     .state('dashboard', {
       url: "/dashboard",
       templateUrl: "dashboard.html"
-    })
-    .state('state1.list', {
-      url: "/list",
-      templateUrl: "partials/state1.list.html",
-      controller: function($scope) {
-        $scope.items = ["A", "List", "Of", "Items"];
-      }
-    })
-    .state('state2', {
-      url: "/state2",
-      templateUrl: "partials/state2.html"
-    })
-    .state('state2.list', {
-      url: "/list",
-      templateUrl: "partials/state2.list.html",
-      controller: function($scope) {
-        $scope.things = ["A", "Set", "Of", "Things"];
-      }
     });
 });
+
 app.controller('dashboardController',function($scope){
       //define data
   var dataset=[1,2,3,4,5,6,5,4,3,2,1,2,3,4,5,6,7,8,9];
@@ -67,6 +55,7 @@ app.controller('dashboardController',function($scope){
       .remove();
   }
   setInterval(function(){
+      console.log("refresh");
     dataset.shift();
     dataset.push(Math.round(Math.random()*100));
     render(dataset);
