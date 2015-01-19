@@ -9,49 +9,26 @@ app.config(function($stateProvider, $urlRouterProvider) {
     .state('info', {
       url: "/info",
       templateUrl: "app/info/info.html",
-      controller: function($scope,dotaService) {
-        $scope.online=0;
+      controller: function($scope,dotaService,mongolabService) {
         $scope.data=[];
         $scope.stop=0;
-        
-        $scope.update=function(){
-            if($scope.stop==0){
-                $scope.stop=setInterval(function(){
-                    console.log("after 5 minutes");
-                    // $scope.data.push({
-                    //     date:new Date(),
-                    //     close:Math.random()*10
-                    // });
-                    // render($scope.data);
-                    
-                    
-                    dotaService.getOnlineNumber().success(function(data){
-                        $scope.online=data.response.player_count;
-                        $scope.data.push({
-                            date:new Date(),
-                            close:data.response.player_count+Math.random()*10
-                        });
-                        
-                        render($scope.data);
-                    })    
-                    
-                },300000);
-            }
-            else{
-                clearInterval($scope.stop);
-                $scope.stop=0;
-            }
-            // dotaService.getOnlineNumber().success(function(data){
-            //     $scope.online=data.response.player_count;
-            //     $scope.data.push({
-            //         date:new Date(),
-            //         close:data.response.player_count
-            //     });
-                
-            //     render(newData);
-            // })    
+        $scope.info=function(){
+            
         }
-        
+        $scope.update=function(){
+            var parseDate = d3.time.format("%Y-%m-%dT%H:%M:%S.%LZ").parse;
+            var end=new Date().getTime();
+            var start=end-1000*60*60*24;
+            mongolabService.getOnlineNumber(new Date(start),new Date(end)).success(function(data){
+                $scope.data=data;
+                $scope.data.forEach(function(d){
+                    d.date=new Date(parseDate(d.date).getTime()+8*60*60*1000);
+                })
+                console.log("Got it!");
+                render($scope.data);
+            });    
+                    
+        }
         // $scope.draw=function(){
         //     var len=Math.random()*10;
         //     console.log(len);
@@ -94,6 +71,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
             .scale(y)
             .orient("left");
         
+        
         var line = d3.svg.line()
             .x(function(d) { return x(d.date); })
             .y(function(d) { return y(d.close); });
@@ -104,6 +82,7 @@ app.config(function($stateProvider, $urlRouterProvider) {
           .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
             
+        
         function render(data){  
             // console.log('render')
             
@@ -155,6 +134,15 @@ app.factory('dotaService', function($http) {
     };
     return service;
 });
-app.factory('mongolabService',function(){
-    
+app.factory('mongolabService',function($http){
+    var key="U0ILXvPGN6SC7otpblL5agQ2D7YQikuB";
+    var service = {
+        getOnlineNumber:function(start,end){
+            var query={date: {$gte: start, $lt: end}};
+            return $http.get("https://api.mongolab.com/api/1/databases/dota2data/collections/online?q="+JSON.stringify(query)+"&apiKey="+key);
+            // return $http.get("https://api.mongolab.com/api/1/databases/dota2data/collections/online?apiKey="+key);
+            
+        }
+    }
+    return service;
 });

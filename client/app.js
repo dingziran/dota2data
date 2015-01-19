@@ -1,4 +1,4 @@
-var app=angular.module("dota2data",['ui.router','info']);  
+var app=angular.module("dota2data",['ui.router','info','online']);  
 app.config(function($stateProvider,$httpProvider, $urlRouterProvider) {
       //Enable cross domain calls
       $httpProvider.defaults.useXDomain = true;
